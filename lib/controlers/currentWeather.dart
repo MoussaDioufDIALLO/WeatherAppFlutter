@@ -1,12 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:weather/models/weather.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:weather/controlers/weather_service.dart';
-
-
+import 'package:weather/models/weather.dart';
 
 class CurrentWeatherPage extends StatefulWidget {
   @override
@@ -17,7 +15,7 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
   List<Weather> weatherList = [];
   bool showWeatherData = false;
   bool isDataLoaded = false;
-  double currentPercentage = 0.0;
+  RxDouble currentPercentage = RxDouble(0.0);
   bool isProgressComplete = false;
 
   @override
@@ -31,7 +29,6 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
       });
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,47 +39,66 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
         child: Column(
           children: [
             SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                LinearPercentIndicator(
-                  width: 250,
-                  lineHeight: 30,
-                  percent: currentPercentage / 100,
-                  center: Text(
-                    '${currentPercentage.toStringAsFixed(0)}%',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
+            Obx(() {
+              if (currentPercentage.value == 100.0) {
+                return Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Réinitialiser la valeur du pourcentage
+                        currentPercentage.value = 0.0;
+                        startProgressAnimation();
+                      },
+                      child: Text('Recommencer'),
                     ),
-                  ),
-                  barRadius: Radius.circular(10),
-                  progressColor: Colors.redAccent,
-                  backgroundColor: Colors.indigo,
-                  animation: true,
-                  animateFromLastPercent: true,
-                  animationDuration: 60000,
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            if (showWeatherData && isDataLoaded && isProgressComplete)
-              ...weatherList.map((weather) =>
-                  Card(
-                    child: ListTile(
-                      title: Text("${weather.city}"),
-                      subtitle: Row(
-                        children: [
-                          Icon(getCloudIcon(weather.clouds)),
-                          SizedBox(width: 10),
-                          Text(
-                              "${weather.temp}°C | ${weather
-                                  .description} | H:${weather
-                                  .high}°C L:${weather.low}°C"),
-                        ],
+                    SizedBox(height: 20),
+                    if (showWeatherData && isDataLoaded && isProgressComplete)
+                      ...weatherList.map((weather) => Card(
+                        child: ListTile(
+                          title: Text("${weather.city}"),
+                          subtitle: Row(
+                            children: [
+                              Icon(getCloudIcon(weather.clouds)),
+                              SizedBox(width: 10),
+                              Text(
+                                "${weather.temp}°C | ${weather.description} | H:${weather.high}°C L:${weather.low}°C",
+                              ),
+                            ],
+                          ),
+                        ),
+                      )),
+                  ],
+                );
+              } else {
+                return Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      LinearPercentIndicator(
+                        width: 250,
+                        lineHeight: 30,
+                        percent: currentPercentage.value / 100,
+                        center: Text(
+                          '${currentPercentage.value.toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25,
+                          ),
+                        ),
+                        barRadius: Radius.circular(10),
+                        progressColor: Colors.redAccent,
+                        backgroundColor: Colors.indigo,
+                        animation: true,
+                        animateFromLastPercent: true,
+                        animationDuration: 60000,
                       ),
-                    ),
-                  )),
+                    ],
+                  ),
+                );
+
+              }
+            }),
+
           ],
         ),
       ),
@@ -96,17 +112,14 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
 
     for (int i = 0; i <= steps; i++) {
       await Future.delayed(updateInterval);
-      setState(() {
-        currentPercentage = i.toDouble();
-      });
-
-      if (currentPercentage >= 100 && !isProgressComplete) {
-        isProgressComplete = true;
-        break;
-      }
+      currentPercentage.value = i.toDouble();
     }
-  }
 
+    isProgressComplete = true;
+    setState(() {
+      showWeatherData = true;
+    });
+  }
 
   IconData getCloudIcon(int clouds) {
     if (clouds < 20) {
@@ -129,12 +142,10 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
     String apiKey = "439886ca1e86859b9393c749a1bebf92";
     List<Weather> weatherList = [];
 
-    final weatherService = WeatherService(
-        Dio()); // Créez une instance de WeatherService
+    final weatherService = WeatherService(Dio());
 
     for (var city in cities) {
       try {
-        // Appelez la méthode getWeatherData de WeatherService
         Weather weather = await weatherService.getWeatherData(
             city, apiKey, "metric");
         weatherList.add(weather);
