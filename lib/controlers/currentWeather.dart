@@ -1,8 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:weather/models/weather.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:weather/controlers/weather_service.dart';
+
+
 
 class CurrentWeatherPage extends StatefulWidget {
   @override
@@ -31,13 +35,13 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Current Weather'),
-        ),
-        body: Center(
-            child: Column(
-                children: [
-                SizedBox(height: 20),
+      appBar: AppBar(
+        title: Text('Current Weather'),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -61,22 +65,25 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
                 ),
               ],
             ),
-                  SizedBox(height: 20),
-                  if (showWeatherData && isDataLoaded && isProgressComplete)
-                    ...weatherList.map((weather) => Card(
-                      child: ListTile(
-                        title: Text("${weather.city}"),
-                        subtitle: Row(
-                          children: [
-                            Icon(getCloudIcon(weather.clouds)),
-                            SizedBox(width: 10),
-                            Text(
-                                "${weather.temp}°C | ${weather.description} | H:${weather.high}°C L:${weather.low}°C"),
-                          ],
-                        ),
+            SizedBox(height: 20),
+            if (showWeatherData && isDataLoaded && isProgressComplete)
+              ...weatherList.map((weather) =>
+                  Card(
+                    child: ListTile(
+                      title: Text("${weather.city}"),
+                      subtitle: Row(
+                        children: [
+                          Icon(getCloudIcon(weather.clouds)),
+                          SizedBox(width: 10),
+                          Text(
+                              "${weather.temp}°C | ${weather
+                                  .description} | H:${weather
+                                  .high}°C L:${weather.low}°C"),
+                        ],
                       ),
-                    )),
-                ],
+                    ),
+                  )),
+          ],
         ),
       ),
     );
@@ -112,15 +119,28 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
   }
 
   Future<List<Weather>> fetchWeatherData() async {
-    List<String> cities = ['Ziguinchor', 'Paris', 'Londres', 'Dubai', 'New York'];
+    List<String> cities = [
+      'Ziguinchor',
+      'Paris',
+      'Londres',
+      'Dubai',
+      'New York'
+    ];
     String apiKey = "439886ca1e86859b9393c749a1bebf92";
     List<Weather> weatherList = [];
 
+    final weatherService = WeatherService(
+        Dio()); // Créez une instance de WeatherService
+
     for (var city in cities) {
-      var url = "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=metric";
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        weatherList.add(Weather.fromJson(jsonDecode(response.body)));
+      try {
+        // Appelez la méthode getWeatherData de WeatherService
+        Weather weather = await weatherService.getWeatherData(
+            city, apiKey, "metric");
+        weatherList.add(weather);
+      } catch (e) {
+        print(
+            "Erreur lors de la récupération des données pour la ville $city: $e");
       }
     }
 
