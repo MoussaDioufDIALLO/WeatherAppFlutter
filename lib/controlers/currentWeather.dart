@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:weather/models/weather.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class CurrentWeatherPage extends StatefulWidget {
   @override

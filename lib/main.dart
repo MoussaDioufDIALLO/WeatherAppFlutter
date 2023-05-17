@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:weather/currentWeather.dart';
+import 'package:weather/Views/welcome_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:weather/welcome_page.dart';
+
 
 void main() {
   runApp(MyApp());

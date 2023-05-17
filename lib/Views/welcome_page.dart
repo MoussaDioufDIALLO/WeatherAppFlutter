@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:weather/currentWeather.dart';
-import 'package:weather/delayed_animation.dart';
+import 'package:weather/controlers/currentWeather.dart';
+import 'package:weather/controlers/delayed_animation.dart';
 import 'package:weather/main.dart';
 
 
@@ -31,7 +31,7 @@ class WelcomePage extends StatelessWidget {
                 )
             ),
               DelayedAnimation(
-                delay: 3500,
+                delay: 2500,
                 child: Container(
                   margin: EdgeInsets.only(
                       top: 30,
