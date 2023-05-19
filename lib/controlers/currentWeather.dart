@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
@@ -17,6 +18,12 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
   bool isDataLoaded = false;
   RxDouble currentPercentage = RxDouble(0.0);
   bool isProgressComplete = false;
+  List<String> messages = [
+    "Nous téléchargeons les données...",
+    "C'est presque fini...",
+    "Plus que quelques secondes avant d'avoir le résultat..."
+  ];
+  int currentMessageIndex = 0;
 
   @override
   void initState() {
@@ -28,7 +35,32 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
         isDataLoaded = true;
       });
     });
+    startMessageRotation();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    timer.cancel();
+  }
+
+  late Timer timer;
+
+  void startMessageRotation() {
+    timer = Timer.periodic(Duration(seconds: 6), (Timer timer) {
+      if (currentPercentage.value < 100 || isProgressComplete == false) {
+        setState(() {
+          currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+        });
+      } else {
+        setState(() {
+          currentMessageIndex = 0;
+        });
+      }
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,34 +71,53 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
         child: Column(
           children: [
             SizedBox(height: 20),
+            Text(
+              currentPercentage.value < 100
+                  ? messages[currentMessageIndex]
+                  : '',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 20),
             Obx(() {
               if (currentPercentage.value == 100.0) {
                 return Column(
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        // Réinitialiser la valeur du pourcentage
-                        currentPercentage.value = 0.0;
-                        startProgressAnimation();
+                        setState(() {
+                          currentPercentage.value = 0.0;
+                          isProgressComplete = false;
+                          showWeatherData = false;
+                          currentMessageIndex = 0; // Réinitialiser currentMessageIndex à 0
+                          if (timer.isActive) {
+                            timer.cancel();
+                          }
+                          startProgressAnimation();
+                          startMessageRotation(); // Ajout de cette ligne pour redémarrer la rotation des messages
+                        });
                       },
+
                       child: Text('Recommencer'),
                     ),
                     SizedBox(height: 20),
                     if (showWeatherData && isDataLoaded && isProgressComplete)
-                      ...weatherList.map((weather) => Card(
-                        child: ListTile(
-                          title: Text("${weather.city}"),
-                          subtitle: Row(
-                            children: [
-                              Icon(getCloudIcon(weather.clouds)),
-                              SizedBox(width: 10),
-                              Text(
-                                "${weather.temp}°C | ${weather.description} | H:${weather.high}°C L:${weather.low}°C",
+                      ...weatherList.map(
+                            (weather) =>
+                            Card(
+                              child: ListTile(
+                                title: Text("${weather.city}"),
+                                subtitle: Row(
+                                  children: [
+                                    Icon(getCloudIcon(weather.clouds)),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      "${weather.temp}°C | ${weather.description} | H:${weather.high}°C L:${weather.low}°C",
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
-                        ),
-                      )),
+                            ),
+                      ),
                   ],
                 );
               } else {
@@ -95,10 +146,8 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
                     ],
                   ),
                 );
-
               }
             }),
-
           ],
         ),
       ),
@@ -110,14 +159,21 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
     const updateInterval = Duration(milliseconds: 600);
     final steps = 100;
 
+    setState(() {
+      currentMessageIndex = 0;
+      isProgressComplete = false;
+      showWeatherData = false;
+    });
+
     for (int i = 0; i <= steps; i++) {
       await Future.delayed(updateInterval);
       currentPercentage.value = i.toDouble();
     }
 
-    isProgressComplete = true;
     setState(() {
+      isProgressComplete = true;
       showWeatherData = true;
+      currentMessageIndex = 0; // Réinitialiser l'index des messages à 0
     });
   }
 
@@ -157,6 +213,7 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
 
     setState(() {
       showWeatherData = true;
+      currentMessageIndex = 0; // Réinitialiser l'index des messages à 0
     });
 
     return weatherList;
