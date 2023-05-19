@@ -5,7 +5,8 @@ class Weather {
   final double? low;
   final double? high;
   final String? description;
-  final int clouds; // ajout de la propriété clouds
+  final int clouds;
+  final double windSpeed; // ajout de la propriété windSpeed
 
   Weather({
     this.city,
@@ -15,6 +16,7 @@ class Weather {
     this.high,
     this.description,
     required this.clouds,
+    required this.windSpeed,
   });
 
   factory Weather.fromJson(Map<String, dynamic> json) {
@@ -25,7 +27,8 @@ class Weather {
       low: json['main']['temp_min'].toDouble(),
       high: json['main']['temp_max'].toDouble(),
       description: json['weather'][0]['description'],
-      clouds: json['clouds'] != null ? json['clouds']['all'] : null, // récupération de la propriété clouds si elle existe
+      clouds: json['clouds'] != null ? json['clouds']['all'] : 0,
+      windSpeed: json['wind']['speed'].toDouble(), // récupération de la propriété windSpeed
     );
   }
 }

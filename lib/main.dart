@@ -9,6 +9,7 @@ void main() {
 }
 
 const d_red = const Color(0xFFE9717D);
+const d_yellow = const Color(0xF7A28E05);
 
 class MyApp extends StatelessWidget {
 
