@@ -38,7 +38,7 @@ class WelcomePage extends StatelessWidget {
                       bottom: 20
                   ),
                   child: Text(
-                    "Stay up-to-date with the latest weather conditions and be prepared for any forecast. Get accurate information on temperature, wind, and precipitation so you can plan your day accordingly.",
+                    "Soyez à jour avec les dernières conditions météorologiques et soyez prêt pour n'importe quelle prévision. Obtenez des informations précises sur la température, le vent et les précipitations pour planifier votre journée en conséquence.",
                     style: GoogleFonts.poppins(
                         color: Colors.black87,
                         fontSize: 16
@@ -56,7 +56,7 @@ class WelcomePage extends StatelessWidget {
                         shape:  StadiumBorder(),
                         padding: EdgeInsets.all(13)
                     ),
-                    child: Text('GET STARTED'),
+                    child: Text('COMMENCER'),
                     onPressed:() {
                       /*  Navigator.push(context, MaterialPageRoute(builder: (context) => SocialPage(),
                               Get.to(SocialPage());

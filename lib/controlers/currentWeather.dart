@@ -92,7 +92,7 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Weather App'),
+        title: Text('MétéoExpress'),
         centerTitle: true,
         backgroundColor: d_red,
       ),
@@ -141,25 +141,39 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
                         children: weatherList.map((weather) {
                           return Card(
                             child: ListTile(
-                              title: Text("${weather.city ?? ''}"),
+                              title: Center(
+                                child: Text(
+                                  "${weather.city ?? ''}",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(getCloudIcon(weather.clouds)),
                                       SizedBox(width: 10),
                                       Text(
-                                        "${weather.temp}°C | ${weather.description} | H:${weather.high}°C L:${weather.low}°C",
+                                        " ${weather.description} | Temp:${weather.temp}°C",
+
                                       ),
                                     ],
                                   ),
+
                                   Row(
                                     children: [
-                                      Icon(Icons.air),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        "${weather.windSpeed} m/s",
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.air),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              "Vents :${weather.windSpeed} m/s | Temp Max:${weather.high}°C | Temp Min:${weather.low}°C",
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -198,7 +212,9 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
                           ),
                           SizedBox(height: 20),
                           Text(
-                            weatherList.isNotEmpty ? "${weatherList[currentBottomMessageIndex]?.city ?? ''} | ${weatherList[currentBottomMessageIndex]?.description ?? ''} | Température: ${weatherList[currentBottomMessageIndex]?.temp ?? ''}°C | Vitesse du vent: ${weatherList[currentBottomMessageIndex]?.windSpeed ?? ''} m/s" : '',
+                            weatherList.isNotEmpty
+                                ? "${weatherList[currentBottomMessageIndex]?.city ?? ''} | ${weatherList[currentBottomMessageIndex]?.description ?? ''} | Température: ${weatherList[currentBottomMessageIndex]?.temp ?? ''}°C | Vitesse du vent: ${weatherList[currentBottomMessageIndex]?.windSpeed ?? ''} m/s"
+                                : '',
                             style: TextStyle(fontSize: 13),
                           ),
                         ],
@@ -255,16 +271,24 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
     final weatherService = WeatherService(Dio());
 
     try {
-      Weather weather = await weatherService.getWeatherData(city, apiKey, "metric");
+      Weather weather =
+          await weatherService.getWeatherData(city, apiKey, "metric");
       return weather;
     } catch (e) {
-      print("Erreur lors de la récupération des données pour la ville $city: $e");
+      print(
+          "Erreur lors de la récupération des données pour la ville $city: $e");
       throw e;
     }
   }
 
   Future<List<Weather>> fetchWeatherData() async {
-    List<String> cities = ['Ziguinchor', 'Paris', 'Londres', 'Dubai', 'New York'];
+    List<String> cities = [
+      'Ziguinchor',
+      'Paris',
+      'Londres',
+      'Dubai',
+      'New York'
+    ];
     String apiKey = "439886ca1e86859b9393c749a1bebf92";
     List<Weather> weatherList = [];
 
@@ -272,10 +296,12 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
 
     for (var city in cities) {
       try {
-        Weather weather = await weatherService.getWeatherData(city, apiKey, "metric");
+        Weather weather =
+            await weatherService.getWeatherData(city, apiKey, "metric");
         weatherList.add(weather);
       } catch (e) {
-        print("Erreur lors de la récupération des données pour la ville $city: $e");
+        print(
+            "Erreur lors de la récupération des données pour la ville $city: $e");
       }
     }
 
