@@ -157,23 +157,28 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
                                       SizedBox(width: 10),
                                       Text(
                                         " ${weather.description} | Temp:${weather.temp}°C",
-
                                       ),
                                     ],
                                   ),
+                                  SizedBox(height: 10), // Ajout d'un espacement vertical
 
-                                  Row(
+                                  // Utilisation de Wrap pour gérer les différentes lignes de texte
+                                  Wrap(
+                                    alignment: WrapAlignment.center,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
                                     children: [
-                                      Expanded(
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.air),
-                                            SizedBox(width: 10),
-                                            Text(
-                                              "Vents :${weather.windSpeed} m/s | Temp Max:${weather.high}°C | Temp Min:${weather.low}°C",
-                                            ),
-                                          ],
-                                        ),
+                                      Icon(Icons.air),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        "Vents :${weather.windSpeed} m/s",
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        "| Temp Max:${weather.high}°C",
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        "| Temp Min:${weather.low}°C",
                                       ),
                                     ],
                                   ),
