@@ -96,140 +96,145 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
         centerTitle: true,
         backgroundColor: d_red,
       ),
-      body: Center(
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            Obx(() {
-              return Text(
-                currentPercentage.value < 100
-                    ? topMessages[currentTopMessageIndex]
-                    : '',
-                style: TextStyle(fontSize: 18),
-              );
-            }),
-            SizedBox(height: 20),
-            Obx(() {
-              if (currentPercentage.value == 100.0) {
-                return Column(
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: d_red,
-                        shape: StadiumBorder(),
-                        padding: EdgeInsets.all(13),
-                        minimumSize: Size(350, 0),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              Obx(() {
+                return Text(
+                  currentPercentage.value < 100
+                      ? topMessages[currentTopMessageIndex]
+                      : '',
+                  style: TextStyle(fontSize: 18),
+                );
+              }),
+              SizedBox(height: 20),
+              Obx(() {
+                if (currentPercentage.value == 100.0) {
+                  return Column(
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: d_red,
+                          shape: StadiumBorder(),
+                          padding: EdgeInsets.all(13),
+                          minimumSize: Size(350, 0),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            currentPercentage.value = 0.0;
+                            isProgressComplete = false;
+                            showWeatherData = false;
+                            currentTopMessageIndex = 0;
+                            currentBottomMessageIndex = 0;
+                            timerTop?.cancel();
+                            timerBottom?.cancel();
+                            startProgressAnimation();
+                            startMessageRotation();
+                          });
+                        },
+                        child: Text('Recommencer'),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          currentPercentage.value = 0.0;
-                          isProgressComplete = false;
-                          showWeatherData = false;
-                          currentTopMessageIndex = 0;
-                          currentBottomMessageIndex = 0;
-                          timerTop?.cancel();
-                          timerBottom?.cancel();
-                          startProgressAnimation();
-                          startMessageRotation();
-                        });
-                      },
-                      child: Text('Recommencer'),
-                    ),
-                    SizedBox(height: 20),
-                    if (showWeatherData && isDataLoaded && isProgressComplete)
-                      Column(
-                        children: weatherList.map((weather) {
-                          return Card(
-                            child: ListTile(
-                              title: Center(
-                                child: Text(
-                                  "${weather.city ?? ''}",
-                                  textAlign: TextAlign.center,
+                      SizedBox(height: 20),
+                      if (showWeatherData && isDataLoaded && isProgressComplete)
+                        Column(
+                          children: weatherList.map((weather) {
+                            return Card(
+                              child: ListTile(
+                                title: Center(
+                                  child: Text(
+                                    "${weather.city ?? ''}",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(getCloudIcon(weather.clouds)),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          " ${weather.description} | Temp:${weather.temp}°C",
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+                                    // Ajout d'un espacement vertical
+
+                                    // Utilisation de Wrap pour gérer les différentes lignes de texte
+                                    Wrap(
+                                      alignment: WrapAlignment.center,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: [
+                                        Icon(Icons.air),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          "Vents :${weather.windSpeed} m/s",
+                                        ),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          "| Temp Max:${weather.high}°C",
+                                        ),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          "| Temp Min:${weather.low}°C",
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(getCloudIcon(weather.clouds)),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        " ${weather.description} | Temp:${weather.temp}°C",
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 10), // Ajout d'un espacement vertical
-
-                                  // Utilisation de Wrap pour gérer les différentes lignes de texte
-                                  Wrap(
-                                    alignment: WrapAlignment.center,
-                                    crossAxisAlignment: WrapCrossAlignment.center,
-                                    children: [
-                                      Icon(Icons.air),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        "Vents :${weather.windSpeed} m/s",
-                                      ),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        "| Temp Max:${weather.high}°C",
-                                      ),
-                                      SizedBox(width: 10),
-                                      Text(
-                                        "| Temp Min:${weather.low}°C",
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                            );
+                          }).toList(),
+                        ),
+                    ],
+                  );
+                } else {
+                  return Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        child: Column(
+                          children: [
+                            LinearPercentIndicator(
+                              width: 410,
+                              lineHeight: 30,
+                              percent: currentPercentage.value / 100,
+                              center: Text(
+                                '${currentPercentage.value.toStringAsFixed(0)}%',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25,
+                                ),
                               ),
+                              barRadius: Radius.circular(10),
+                              progressColor: d_red,
+                              backgroundColor: Colors.indigo,
+                              animation: true,
+                              animateFromLastPercent: true,
+                              animationDuration: 60000,
                             ),
-                          );
-                        }).toList(),
-                      ),
-                  ],
-                );
-              } else {
-                return Column(
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      child: Column(
-                        children: [
-                          LinearPercentIndicator(
-                            width: 410,
-                            lineHeight: 30,
-                            percent: currentPercentage.value / 100,
-                            center: Text(
-                              '${currentPercentage.value.toStringAsFixed(0)}%',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 25,
-                              ),
+                            SizedBox(height: 20),
+                            Text(
+                              weatherList.isNotEmpty
+                                  ? "${weatherList[currentBottomMessageIndex]?.city ?? ''} | ${weatherList[currentBottomMessageIndex]?.description ?? ''} | Température: ${weatherList[currentBottomMessageIndex]?.temp ?? ''}°C | Vitesse du vent: ${weatherList[currentBottomMessageIndex]?.windSpeed ?? ''} m/s"
+                                  : '',
+                              style: TextStyle(fontSize: 13),
                             ),
-                            barRadius: Radius.circular(10),
-                            progressColor: d_red,
-                            backgroundColor: Colors.indigo,
-                            animation: true,
-                            animateFromLastPercent: true,
-                            animationDuration: 60000,
-                          ),
-                          SizedBox(height: 20),
-                          Text(
-                            weatherList.isNotEmpty
-                                ? "${weatherList[currentBottomMessageIndex]?.city ?? ''} | ${weatherList[currentBottomMessageIndex]?.description ?? ''} | Température: ${weatherList[currentBottomMessageIndex]?.temp ?? ''}°C | Vitesse du vent: ${weatherList[currentBottomMessageIndex]?.windSpeed ?? ''} m/s"
-                                : '',
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              }
-            }),
-          ],
+                    ],
+                  );
+                }
+              }),
+            ],
+          ),
         ),
       ),
     );
